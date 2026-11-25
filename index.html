@@ -1972,7 +1972,9 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2.5rem 5r
     </div>
 
     <div class="contact-form reveal reveal-delay-1">
-      <form id="contact-form" action="https://formsubmit.co/aryakrishnalko@gmail.com" method="POST" onsubmit="handleSubmit(event)" novalidate>
+      <iframe name="form_target_frame" id="form_target_frame" style="display:none;width:0;height:0;border:0;" tabindex="-1"></iframe>
+      <form id="contact-form" action="https://formsubmit.co/aryakrishnalko@gmail.com" method="POST" target="form_target_frame" onsubmit="handleSubmit(event)" novalidate>
+        <input type="hidden" name="_next" value="https://aryakrishna148.github.io/portfolios/?success=true#contact">
         <input type="hidden" name="_subject" value="New Portfolio Message for Arya Krishna">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_template" value="table">
@@ -2150,86 +2152,41 @@ setTimeout(typeWriter,1200);
 
 // ── CONTACT FORM (Direct delivery to aryakrishnalko@gmail.com)
 function handleSubmit(e){
-  e.preventDefault();
   const btn = document.getElementById('submit-btn');
   const status = document.getElementById('form-status');
   const fname = document.getElementById('fname').value.trim();
   const lname = document.getElementById('lname').value.trim();
   const email = document.getElementById('email').value.trim();
-  const phone = document.getElementById('phone') ? document.getElementById('phone').value.trim() : '';
   const message = document.getElementById('message').value.trim();
 
   if(!fname || !lname || !email || !message){
-    status.textContent = '⚠ Please fill in all required fields.';
+    e.preventDefault();
+    status.innerHTML = '⚠️ Please fill in all required fields.';
     status.className = 'error';
     return;
   }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-    status.textContent = '⚠ Please enter a valid email address.';
+    e.preventDefault();
+    status.innerHTML = '⚠️ Please enter a valid email address.';
     status.className = 'error';
     return;
   }
 
+  // Native submission posts into the hidden iframe (target="form_target_frame") in background
   btn.disabled = true;
   btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> Sending message…';
   status.textContent = '';
   status.className = '';
 
-  const payload = {
-    name: fname + ' ' + lname,
-    email: email,
-    phone: phone || 'Not provided',
-    message: message,
-    _subject: `New Portfolio Message from ${fname} ${lname}`,
-    _captcha: 'false',
-    _template: 'table'
-  };
-
-  fetch('https://formsubmit.co/ajax/aryakrishnalko@gmail.com', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(res => res.json())
-  .then(data => {
+  setTimeout(() => {
     btn.disabled = false;
     btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send Message';
-    if (data.success === 'true' || data.success === true) {
-      status.innerHTML = '✓ Message sent directly to <strong>Arya Krishna</strong>! Arya will reply as soon as possible.';
-      status.className = 'success';
-      document.getElementById('contact-form').reset();
-      setTimeout(() => {
-        status.textContent = '';
-        status.className = '';
-      }, 10000);
-    } else {
-      if (window.location.protocol === 'file:') {
-        status.innerHTML = '⚠ Notice: Offline local file (file:///) blocks background emailing. Test on <a href="http://localhost:8080/index.html" style="color:var(--accent3);text-decoration:underline;">localhost:8080</a> or publish to GitHub for 100% automatic silent delivery!';
-        status.className = 'error';
-      } else {
-        throw new Error(data.message || 'Form submission failed');
-      }
-    }
-  })
-  .catch(err => {
-    console.warn('Submission notice:', err);
-    btn.disabled = false;
-    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send Message';
-    if (window.location.protocol === 'file:') {
-      status.innerHTML = '⚠ Notice: Offline local file (file:///) blocks background emailing. Test on <a href="http://localhost:8080/index.html" style="color:var(--accent3);text-decoration:underline;">localhost:8080</a> or publish to GitHub for 100% automatic silent delivery!';
-      status.className = 'error';
-    } else {
-      status.innerHTML = '✓ Message sent directly to <strong>Arya Krishna</strong>! Arya will reply as soon as possible.';
-      status.className = 'success';
-      document.getElementById('contact-form').reset();
-    }
-  });
+    status.innerHTML = '✓ Message submitted to <strong>Arya Krishna</strong>! Arya will reply as soon as possible.<div style="font-size:0.83rem;color:var(--text-muted);margin-top:0.45rem;line-height:1.45;">ℹ <strong>First time sending from your live site?</strong> Please check your Gmail (<span style="color:var(--accent2);">aryakrishnalko@gmail.com</span>) to click the 1-time <em>"Activate Form"</em> link from FormSubmit if requested.</div>';
+    status.className = 'success';
+    document.getElementById('contact-form').reset();
+  }, 1600);
 }
 
-// ── FILMS FILTER & LIGHTBOX
 function filterGallery(category, btn) {
   document.querySelectorAll('.film-filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
